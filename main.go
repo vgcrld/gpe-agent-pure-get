@@ -29,12 +29,19 @@ func main() {
 		usage()
 	}
 
-	// postRequest("/api/v1/auth/session")
-	getRequest()
+	var data string
+
+	data = getRequest("/api/versions")
+	fmt.Println(data)
+
+	data = getRequest("")
+	fmt.Println(data)
 }
 
 func usage() {
-	fmt.Println("you messed up")
+	command := os.Args[0]
+	msg := fmt.Sprintf("%s -t <token> -i <ip> -e <endpoint>", command)
+	fmt.Println(msg)
 	os.Exit(1)
 }
 
@@ -61,11 +68,17 @@ func postRequest(endpoint string) {
 	fmt.Println(res["form"])
 }
 
-func getRequest() {
+func getRequest(ep string) string {
 
-	getRequest := *ip + *endpoint
+	var request string
 
-	resp, err := http.Get(getRequest)
+	if ep != "" {
+		request = *ip + ep
+	} else {
+		request = *ip + *endpoint
+	}
+
+	resp, err := http.Get(request)
 
 	if err != nil {
 		log.Fatal(err)
@@ -79,5 +92,5 @@ func getRequest() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(string(body))
+	return string(body)
 }
