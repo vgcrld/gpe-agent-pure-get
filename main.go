@@ -17,7 +17,9 @@ var (
 	ip       *string
 	endpoint *string
 
-	api_version string
+	query             string
+	post_auth_session string
+	api_version       string
 )
 
 type versions struct {
@@ -26,6 +28,16 @@ type versions struct {
 
 func main() {
 
+	setFlags()
+
+	api_version = getLatestVersion1()
+
+	query = "https://" + *ip + "/api/" + api_version + *endpoint
+	post_auth_session = "https://" + *ip + "/api/" + api_version + "/auth/session"
+
+}
+
+func setFlags() {
 	token = flag.String("t", "", "User token")
 	ip = flag.String("i", "", "Array IP")
 	endpoint = flag.String("e", "", "Endpoint")
@@ -35,11 +47,6 @@ func main() {
 	if *token == "" || *ip == "" || *endpoint == "" {
 		usage()
 	}
-
-	api_version = getLatestVersion1()
-
-	// data = getRequest("")
-	// fmt.Println(data)
 }
 
 func getLatestVersion1() string {
@@ -106,7 +113,7 @@ func getRequest(ep string) []byte {
 		request = *ip + *endpoint
 	}
 
-	resp, err := http.Get(request)
+	resp, err := http.Get("https://" + request)
 
 	if err != nil {
 		log.Fatal(err)
