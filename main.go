@@ -9,13 +9,20 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 var (
 	token    *string
 	ip       *string
 	endpoint *string
+
+	api_version string
 )
+
+type versions struct {
+	Version []string `json:"version"`
+}
 
 func main() {
 
@@ -29,13 +36,34 @@ func main() {
 		usage()
 	}
 
-	var data string
+	api_version = getLatestVersion1()
 
-	data = getRequest("/api/versions")
-	fmt.Println(data)
+	// data = getRequest("")
+	// fmt.Println(data)
+}
 
-	data = getRequest("")
-	fmt.Println(data)
+func getLatestVersion1() string {
+	var data []byte
+	data = getRequest("/api/api_version")
+
+	var vers versions
+	err := json.Unmarshal(data, &vers)
+	if err != nil {
+		log.Fatal("can unmarshal vers")
+	}
+
+	var v1s []string
+
+	for _, v := range vers.Version {
+		s := strings.Split(v, ".")
+		if s[0] == "1" {
+			v1s = append(v1s, v)
+		}
+	}
+
+	lv := v1s[len(v1s)-1]
+
+	return lv
 }
 
 func usage() {
@@ -68,7 +96,7 @@ func postRequest(endpoint string) {
 	fmt.Println(res["form"])
 }
 
-func getRequest(ep string) string {
+func getRequest(ep string) []byte {
 
 	var request string
 
@@ -92,5 +120,5 @@ func getRequest(ep string) string {
 		log.Fatal(err)
 	}
 
-	return string(body)
+	return body
 }
