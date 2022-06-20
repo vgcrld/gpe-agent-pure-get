@@ -4,11 +4,13 @@ Simple GET, POST for API pure storage routines.
 
 ## Usage
 
-pureget -i <array-ip-fqdn> -r request
+Get data from a pure storage array to be used for populating Zabbix.
+
+`pureget -i <array-ip-fqdn> -r request`
   
 ## Supported Requests
   
-versions
-lag
+* versions
+* lag
   
   
