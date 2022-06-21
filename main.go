@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -32,8 +34,17 @@ func main() {
 
 	api_version = getLatestVersion1()
 
-	query = "https://" + *ip + "/api/" + api_version + *endpoint
 	post_auth_session = "https://" + *ip + "/api/" + api_version + "/auth/session"
+	sessionToken := getSessionToken(post_auth_session, *token)
+
+	ep := "https://" + *ip + "/api/" + api_version + *endpoint
+	resp, err := getPureData(ep, sessionToken)
+	if err != nil {
+		log.Fatal("unable to fetch ", *endpoint)
+	}
+
+	pods, err := io.ReadAll(resp.Body)
+	fmt.Println(string(pods))
 
 }
 
@@ -128,4 +139,39 @@ func getRequest(ep string) []byte {
 	}
 
 	return body
+}
+
+func getSessionToken(sessionEndpoint, token string) string {
+	requestBody, err := json.Marshal(map[string]string{
+		"api_token": token,
+	})
+
+	resp, err := http.Post(sessionEndpoint, "application/json", bytes.NewBuffer(requestBody))
+
+	if err != nil {
+		log.Fatal("cannot load")
+	}
+	cookies := resp.Header["Set-Cookie"][0]
+	sessionToken := strings.Split(cookies, ";")[0]
+
+	return sessionToken
+}
+
+func getPureData(endpoint, sessionToken string) (*http.Response, error) {
+
+	emptyBody, _ := json.Marshal(map[string]string{})
+	podGet, err := http.NewRequest("GET", endpoint, bytes.NewBuffer(emptyBody))
+	if err != nil {
+		log.Fatal("cannot GET pod")
+	}
+	podGet.Header.Add("Cookie", sessionToken)
+
+	client := &http.Client{}
+	podData, err := client.Do(podGet)
+	if err != nil {
+		log.Fatal("unable to create http client")
+	}
+	defer podData.Body.Close()
+
+	return podData, err
 }
