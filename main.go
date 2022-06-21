@@ -38,20 +38,25 @@ func main() {
 	sessionToken := getSessionToken(post_auth_session, *token)
 
 	ep := "https://" + *ip + "/api/" + api_version + *endpoint
+	// log.Println("attempting endpoing: ", ep)
 	resp, err := getPureData(ep, sessionToken)
 	if err != nil {
 		log.Fatal("unable to fetch ", *endpoint)
 	}
+	defer resp.Body.Close()
 
 	pods, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("can read response body", err)
+	}
 	fmt.Println(string(pods))
 
 }
 
 func setFlags() {
-	token = flag.String("t", "", "User token")
-	ip = flag.String("i", "", "Array IP")
-	endpoint = flag.String("e", "", "Endpoint")
+	token = flag.String("token", "", "User token")
+	ip = flag.String("ip", "", "Array IP")
+	endpoint = flag.String("endpoint", "", "Endpoint")
 
 	flag.Parse()
 
@@ -171,7 +176,6 @@ func getPureData(endpoint, sessionToken string) (*http.Response, error) {
 	if err != nil {
 		log.Fatal("unable to create http client")
 	}
-	defer podData.Body.Close()
 
 	return podData, err
 }
