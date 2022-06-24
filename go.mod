@@ -1,3 +1,3 @@
-module codebox.galileosuite.com/m/v2
+module codebox.galileosuite.com/pureget/v2
 
 go 1.18
