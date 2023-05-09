@@ -6,7 +6,7 @@ Grab simple GET requests from a pure storage with a user token.
 
 Get data from a pure storage array to be used for populating Zabbix.
 
-`pureget -ip <array-ip-fqdn> -endpoing <request> -token <token>`
+`pureget -ip <array-ip-fqdn> -endpoint <request> -token <token>`
 
  
 ## Examples
